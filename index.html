@@ -4,7 +4,832 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ficha Cyberpunk RED (v2.0 - Manual)</title>
-    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* GLOBAIS / RESET */
+        :root {
+            --cor-vermelha-principal: #AA0000;
+            --cor-vermelha-escura: #770000;
+            --cor-fundo-claro: #F5F5F5;
+            --cor-fundo-escuro: #E0E0E0;
+            --cor-borda: #333;
+            --cor-texto: #111;
+            --fonte-principal: 'Arial', sans-serif;
+        }
+
+        @page {
+            size: A4;
+            margin: 0.5cm;
+        }
+
+        body {
+            font-family: var(--fonte-principal);
+            background-color: #EEE;
+            color: var(--cor-texto);
+            line-height: 1.4;
+            padding: 20px;
+            margin: 0;
+        }
+
+        input, textarea, select {
+            font-family: inherit;
+            font-size: 1em;
+            border: none;
+            background-color: transparent;
+            border-bottom: 1px dashed var(--cor-borda);
+            padding: 2px 5px;
+            box-sizing: border-box;
+            color: var(--cor-texto);
+        }
+
+        textarea {
+            resize: vertical;
+            border: 1px solid var(--cor-borda);
+            min-height: 50px;
+            background-color: var(--cor-fundo-claro);
+            padding: 5px;
+        }
+
+        label {
+            font-size: 0.8em;
+            font-weight: bold;
+            display: block;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        /* ESTRUTURA PRINCIPAL */
+        .sheet-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 20px auto;
+            border: 5px solid var(--cor-vermelha-principal);
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CONTROLES DE CABEÇALHO */
+        .header-controls {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px 0;
+            text-align: right;
+        }
+
+        .header-controls button, .header-controls .btn-import {
+            background-color: var(--cor-vermelha-principal);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            margin-left: 5px;
+            font-weight: bold;
+            border-radius: 3px;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+        .header-controls button:hover, .header-controls .btn-import:hover {
+            background-color: var(--cor-vermelha-escura);
+        }
+
+        /* GERENCIADOR DE FICHAS */
+        #sheetManager {
+            position: fixed;
+            top: 50px;
+            right: 50px;
+            background: white;
+            border: 2px solid var(--cor-vermelha-principal);
+            padding: 15px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        #sheetList {
+            margin-bottom: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .sheet-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            border-bottom: 1px dashed #DDD;
+            cursor: pointer;
+        }
+
+        .sheet-item:hover, .sheet-item.active {
+            background-color: var(--cor-fundo-claro);
+        }
+
+        .sheet-item .delete-btn {
+            background: var(--cor-vermelha-escura);
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 0.7em;
+        }
+
+        /* STATS (BARRA LATERAL) */
+        .stats-sidebar {
+            width: 150px;
+            background-color: var(--cor-vermelha-escura);
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-box {
+            color: white;
+            margin-bottom: 5px;
+            padding: 5px;
+            background-color: var(--cor-vermelha-principal);
+            border: 1px solid white;
+        }
+
+        .stat-box label {
+            font-size: 1.1em;
+            color: white;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        .stat-box input {
+            color: var(--cor-texto);
+            background-color: var(--cor-fundo-claro);
+            width: 100%;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-bottom: none;
+            padding: 5px 0;
+        }
+
+        /* INPUT GROUPS */
+        .input-group {
+            margin-bottom: 10px;
+            border: 1px solid var(--cor-borda);
+            padding: 5px;
+        }
+
+        .input-group label {
+            margin-bottom: 3px;
+            color: var(--cor-vermelha-principal);
+            font-size: 0.7em;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+        }
+
+        .input-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* HEADER INFO */
+        .header-info {
+            display: flex;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .image-box {
+            width: 200px;
+            height: 300px;
+            border: 3px solid var(--cor-vermelha-principal);
+            background-color: var(--cor-fundo-escuro);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .image-label {
+            display: block;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #characterImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #uploadText {
+            color: #666;
+            font-size: 0.9em;
+            padding: 10px;
+            display: block;
+        }
+
+        .text-info {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .text-info .input-group:nth-child(3) input {
+            width: calc(100% - 70px);
+            display: inline-block;
+        }
+        .text-info .input-group:nth-child(3) input[type="number"] {
+            width: 60px;
+            float: right;
+            border-bottom: 1px dashed var(--cor-borda);
+        }
+
+        /* CALCULATED STATS (PV, HUMANIDADE) */
+        .calculated-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .humanidade-box, .hp-box, .crit-vicios-box {
+            border: 2px solid var(--cor-vermelha-principal);
+            padding: 5px;
+            flex: 1;
+            background-color: var(--cor-fundo-claro);
+        }
+
+        .humanidade-box label, .hp-box label {
+            font-size: 1em;
+            color: var(--cor-vermelha-escura);
+        }
+
+        .humanidade-box input, .hp-inputs input {
+            font-size: 1.5em;
+            font-weight: bold;
+            width: 100%;
+            text-align: center;
+            border: none;
+        }
+
+        .hp-inputs {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .hp-inputs input {
+            flex: 1;
+        }
+
+        .max-label {
+            font-size: 0.8em;
+            font-weight: normal;
+            color: #555;
+            margin-left: 5px;
+            white-space: nowrap;
+        }
+
+        .max-label input {
+            font-size: 1em;
+            width: 30px;
+            text-align: left;
+            display: inline;
+        }
+
+        .crit-vicios-box {
+            flex-direction: column;
+            display: flex;
+        }
+        .crit-vicios-box textarea {
+            flex-grow: 1;
+            min-height: 50px;
+            border: none;
+            padding: 0;
+            margin-top: 2px;
+        }
+        .lesoes-criticas { flex: 1; }
+        .vicios { flex: 1; margin-top: 5px; }
+
+        /* GRAVEMENTE FERIDO BOX */
+        .gravemente-ferido-box {
+            display: flex;
+            border: 2px solid var(--cor-vermelha-principal);
+            margin-bottom: 10px;
+            background-color: var(--cor-fundo-escuro);
+        }
+
+        .gf-status, .gf-penalidade, .teste-morte {
+            padding: 5px 10px;
+            border-right: 1px solid var(--cor-vermelha-principal);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .gf-status {
+            flex: 1;
+            min-width: 120px;
+        }
+        .gf-status label {
+            font-size: 1em;
+            color: var(--cor-vermelha-escura);
+            margin-bottom: 5px;
+        }
+        .gf-status input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--cor-vermelha-principal);
+            cursor: pointer;
+            border: 1px solid var(--cor-borda);
+            border-bottom: none;
+        }
+        #gf_limiar {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .gf-penalidade {
+            flex: 2;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: var(--cor-vermelha-escura);
+        }
+
+        .teste-morte {
+            flex: 1;
+            border-right: none;
+            min-width: 100px;
+        }
+        .teste-morte label {
+            font-size: 0.9em;
+            color: var(--cor-vermelha-escura);
+        }
+        .teste-morte input {
+            font-size: 1.5em;
+            font-weight: bold;
+            width: 100%;
+            text-align: center;
+            border: none;
+        }
+
+
+        /* ABAS */
+        .tabs {
+            display: flex;
+            margin-bottom: 5px;
+        }
+
+        .tab-link {
+            background-color: var(--cor-fundo-escuro);
+            border: 1px solid var(--cor-borda);
+            border-bottom: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 3px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+
+        .tab-link.active {
+            background-color: white;
+            border-bottom: 1px solid white; /* Cobre a borda de baixo */
+        }
+
+        .tab-content {
+            border: 1px solid var(--cor-borda);
+            padding: 10px;
+            background-color: white;
+            display: none;
+            flex-grow: 1;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* PERÍCIAS */
+        .pericias-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .pericias-box {
+            border: 1px solid var(--cor-borda);
+            padding: 5px;
+            background-color: var(--cor-fundo-claro);
+        }
+
+        .pericias-box.full-span {
+            grid-column: 1 / -1;
+        }
+
+        .pericias-box h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1em;
+            border-bottom: 2px solid var(--cor-vermelha-principal);
+            padding-bottom: 3px;
+            color: var(--cor-vermelha-escura);
+        }
+
+        .skill-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .skill-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr;
+            font-weight: bold;
+            font-size: 0.8em;
+            text-align: center;
+            border-bottom: 1px solid #AAA;
+            padding-bottom: 3px;
+            margin-bottom: 3px;
+        }
+
+        .skill-header span:first-child {
+            text-align: left;
+            padding-left: 5px;
+        }
+
+        .skill-item {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr;
+            gap: 5px;
+            padding: 2px 0;
+            align-items: center;
+        }
+
+        .skill-item:nth-child(even) {
+            background-color: var(--cor-fundo-escuro);
+        }
+
+        .skill-name {
+            padding-left: 5px;
+            font-size: 0.9em;
+        }
+
+        .skill-name .stat-label {
+            font-weight: normal;
+            color: #666;
+            font-size: 0.9em;
+            display: inline;
+        }
+
+        .skill-item input {
+            text-align: center;
+            font-size: 1em;
+            padding: 0;
+            border-bottom: 1px dashed #AAA;
+            background-color: transparent;
+            width: 100%;
+        }
+
+        /* PERÍCIAS DINÂMICAS (IDIOMAS, ETC) */
+        .dynamic-skill-box {
+            margin-top: 10px;
+            border: 1px solid #AAA;
+            padding: 5px;
+        }
+
+        .dynamic-skill-box .skill-header {
+            grid-template-columns: 3fr 1fr 1fr 1fr;
+            padding-right: 40px; /* Espaço para o botão de deletar */
+        }
+
+        .dynamic-skill-item {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr 40px; /* Nome, NVL, STAT, BASE, Del */
+            gap: 5px;
+            padding: 5px 0;
+            align-items: center;
+        }
+
+        .dynamic-skill-item input {
+            border: 1px dashed #AAA;
+            text-align: center;
+        }
+
+        .dynamic-skill-item .skill-name-input { grid-column: 1 / 2; }
+        .dynamic-skill-item .skill-nvl { grid-column: 2 / 3; }
+        .dynamic-skill-item .skill-stat { grid-column: 3 / 4; }
+        .dynamic-skill-item .skill-base { grid-column: 4 / 5; }
+
+        .dynamic-skill-item .delete-row-btn {
+            grid-column: 5 / 6;
+            background: var(--cor-vermelha-escura);
+            color: white;
+            border: none;
+            padding: 4px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        .add-row-btn {
+            background-color: var(--cor-vermelha-principal);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-top: 5px;
+            font-size: 0.9em;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+        .add-row-btn:hover {
+            background-color: var(--cor-vermelha-escura);
+        }
+
+
+        /* INVENTÁRIO & ARMAS */
+        .tab-content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .section-box {
+            border: 1px solid var(--cor-borda);
+            padding: 10px;
+            background-color: var(--cor-fundo-claro);
+        }
+
+        .section-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            border-bottom: 2px solid var(--cor-vermelha-principal);
+            padding-bottom: 3px;
+            color: var(--cor-vermelha-escura);
+            text-align: center;
+        }
+
+        .section-box.full-span {
+            grid-column: 1 / -1;
+        }
+
+        .simple-box .input-group {
+            border: none;
+            padding: 0;
+        }
+        .simple-box .input-group input {
+            border-bottom: 1px dashed var(--cor-vermelha-escura);
+        }
+        .simple-box .input-group label {
+            font-size: 0.9em;
+        }
+
+        /* Armaduras */
+        .armaduras-box {
+            display: flex;
+            flex-direction: column;
+        }
+        .armor-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 5px;
+            padding: 5px 0;
+            align-items: center;
+        }
+        .armor-header {
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #AAA;
+            margin-bottom: 5px;
+        }
+        .armor-item span {
+            text-align: left;
+            padding-left: 5px;
+            font-weight: bold;
+        }
+        .armor-item input {
+            text-align: center;
+            border: 1px dashed #AAA;
+        }
+        .armaduras-box .small-text {
+            font-size: 0.7em;
+            text-align: center;
+            margin-top: 10px;
+            color: #555;
+        }
+
+        /* Armas */
+        .arma-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 2fr 40px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #AAA;
+            padding-bottom: 3px;
+            margin-bottom: 3px;
+            font-size: 0.9em;
+        }
+        .arma-header span:first-child { text-align: left; padding-left: 5px;}
+
+        .arma-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 2fr 40px;
+            gap: 5px;
+            padding: 3px 0;
+            align-items: center;
+        }
+        .arma-item input {
+            border: 1px dashed #AAA;
+        }
+        .arma-item .delete-row-btn {
+            background: var(--cor-vermelha-escura);
+            color: white;
+            border: none;
+            padding: 3px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        /* Equipamentos */
+        .equip-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr 3fr 40px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #AAA;
+            padding-bottom: 3px;
+            margin-bottom: 3px;
+            font-size: 0.9em;
+        }
+        .equip-header span:first-child { text-align: left; padding-left: 5px;}
+
+        .equip-item {
+            display: grid;
+            grid-template-columns: 3fr 1fr 3fr 40px;
+            gap: 5px;
+            padding: 3px 0;
+            align-items: center;
+        }
+        .equip-item input {
+            border: 1px dashed #AAA;
+        }
+        .equip-item .delete-row-btn {
+            background: var(--cor-vermelha-escura);
+            color: white;
+            border: none;
+            padding: 3px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+
+        /* CYBERWARE */
+        .cyber-flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .cyber-list-box {
+            border: 1px solid var(--cor-borda);
+            padding: 5px;
+            flex: 1 1 calc(50% - 10px); /* 2 por linha */
+            min-width: 300px;
+        }
+        .cyber-list-box.full-span {
+            flex: 1 1 100%;
+        }
+
+        .cyber-list-box h3 {
+            margin: 0 0 5px 0;
+            font-size: 1em;
+            border-bottom: 1px solid var(--cor-vermelha-principal);
+            padding-bottom: 3px;
+            color: var(--cor-vermelha-escura);
+            text-align: center;
+        }
+
+        .cyber-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 40px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #AAA;
+            padding-bottom: 3px;
+            margin-bottom: 3px;
+            font-size: 0.9em;
+        }
+        .cyber-header span:first-child { text-align: left; padding-left: 5px;}
+
+        .cyber-list-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .cyber-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 40px;
+            gap: 5px;
+            padding: 3px 0;
+            align-items: center;
+        }
+        .cyber-item input {
+            border: 1px dashed #AAA;
+        }
+        .cyber-item .delete-row-btn {
+            background: var(--cor-vermelha-escura);
+            color: white;
+            border: none;
+            padding: 3px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        /* LIFEPATH */
+        .lifepath-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .lifepath-grid .section-box:last-child {
+            grid-column: 1 / -1;
+        }
+
+        .lifepath-grid .section-box .input-group {
+            border: none;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+        .lifepath-grid .section-box label {
+            font-size: 0.9em;
+            color: var(--cor-vermelha-escura);
+        }
+        .lifepath-grid .section-box textarea {
+            min-height: 40px;
+        }
+        .lifepath-grid .section-box input[type="number"] {
+            width: 100%;
+            text-align: center;
+            font-size: 1.2em;
+            border: 1px dashed var(--cor-vermelha-escura);
+        }
+
+        /* PRINT MEDIA */
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            .header-controls, #sheetManager, .tabs, .add-row-btn, .delete-row-btn {
+                display: none !important;
+            }
+            .sheet-container {
+                border: none;
+                box-shadow: none;
+                margin: 0;
+                max-width: none;
+            }
+            .main-content {
+                /* Para garantir que o conteúdo preencha a página */
+                height: 100vh;
+            }
+            .tab-content {
+                display: flex !important;
+                border: none;
+                padding: 0;
+                flex-grow: 1;
+            }
+            #pericias-tab {
+                /* Garante que o grid de perícias fique visível e formatado */
+                display: flex !important;
+                flex-direction: column;
+                page-break-after: always; /* Começa a próxima aba em nova página */
+            }
+            #pericias-tab .pericias-grid {
+                flex-grow: 1;
+            }
+            #inventario-tab, #cyberware-tab, #lifepath-tab {
+                 /* Para garantir que as abas não ativas apareçam */
+                display: flex !important;
+                page-break-after: always;
+            }
+
+            /* Corrige o input para aparecer o valor no print */
+            input, textarea {
+                color: var(--cor-texto) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
 </head>
 <body>
     <div id="sheetManager" style="display:none;">
@@ -606,6 +1431,644 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            let currentSheetId = localStorage.getItem('cyberpunkRedCurrentSheet') || 'ficha-0';
+            let sheets = JSON.parse(localStorage.getItem('cyberpunkRedSheets')) || {};
+            if (Object.keys(sheets).length === 0) {
+                sheets['ficha-0'] = { 'alcunha': 'Nova Ficha' };
+            }
+
+            // --- DEFINIÇÃO DE PERÍCIAS (Baseado no PDF) ---
+            const pdfPericias = {
+                consciencia: [
+                    { nome: 'Concentração', stat: 'VON' },
+                    { nome: 'Leitura Labial', stat: 'INT' },
+                    { nome: 'Ocultar/Revelar Objeto', stat: 'INT' },
+                    { nome: 'Percepção', stat: 'INT' },
+                    { nome: 'Rastreamento', stat: 'INT' }
+                ],
+                corporais: [
+                    { nome: 'Atletismo', stat: 'DES' },
+                    { nome: 'Contorcionismo', stat: 'DES' },
+                    { nome: 'Dança', stat: 'DES' },
+                    { nome: 'Furtividade', stat: 'DES' },
+                    { nome: 'Resistência', stat: 'VON' },
+                    { nome: 'Resistir à Tortura/Drogas', stat: 'VON' }
+                ],
+                controle: [
+                    { nome: 'Condutor de Veículo Terrestre', stat: 'REF' },
+                    { nome: 'Montaria', stat: 'REF' },
+                    { nome: 'Piloto de Veículo Aéreo (x2)', stat: 'REF' },
+                    { nome: 'Piloto de Veículo Marítimo', stat: 'REF' }
+                ],
+                educacionais: [
+                    { nome: 'Burocracia', stat: 'INT' },
+                    { nome: 'Contabilidade', stat: 'INT' },
+                    { nome: 'Criação', stat: 'INT' },
+                    { nome: 'Criminologia', stat: 'INT' },
+                    { nome: 'Criptografia', stat: 'INT' },
+                    { nome: 'Dedução', stat: 'INT' },
+                    { nome: 'Educação', stat: 'INT' },
+                    { nome: 'Jogos de Azar', stat: 'INT' },
+                    { nome: 'Negócios', stat: 'INT' },
+                    { nome: 'Trato com Animais', stat: 'INT' },
+                    { nome: 'Biblioteconomia', stat: 'INT' },
+                    { nome: 'Sobrevivência na Natureza', stat: 'INT' },
+                    { nome: 'Táticas', stat: 'INT' }
+                ],
+                luta: [
+                    { nome: 'Armas Brancas', stat: 'DES' },
+                    { nome: 'Artes Marciais', stat: 'DES' },
+                    { nome: 'Briga', stat: 'DES' },
+                    { nome: 'Evasão', stat: 'DES' }
+                ],
+                longoalcance: [
+                    { nome: 'Armas Pesadas (x2)', stat: 'REF' },
+                    { nome: 'Armas de Ombro', stat: 'REF' },
+                    { nome: 'Arquearia', stat: 'REF' },
+                    { nome: 'Armas de Mão', stat: 'REF' },
+                    { nome: 'Fogo Automático (x2)', stat: 'REF' }
+                ],
+                sociais: [
+                    { nome: 'Comércio', stat: 'MOR' },
+                    { nome: 'Conversação', stat: 'EMP' },
+                    { nome: 'Cuidados Pessoais', stat: 'MOR' },
+                    { nome: 'Interrogação', stat: 'MOR' },
+                    { nome: 'Manha', stat: 'MOR' },
+                    { nome: 'Percepção Humana', stat: 'EMP' },
+                    { nome: 'Persuasão', stat: 'MOR' },
+                    { nome: 'Suborno', stat: 'MOR' },
+                    { nome: 'Vestimenta & Estilo', stat: 'MOR' }
+                ],
+                tecnicas: [
+                    { nome: 'Abrir Fechadura', stat: 'TEC' },
+                    { nome: 'Cibertecnologia', stat: 'TEC' },
+                    { nome: 'Demolição (x2)', stat: 'TEC' },
+                    { nome: 'Falsificação', stat: 'TEC' },
+                    { nome: 'Fotografia/Filmagem', stat: 'TEC' },
+                    { nome: 'Paramédico (x2)', stat: 'TEC' },
+                    { nome: 'Pintar/Desenhar/Esculpir', stat: 'TEC' },
+                    { nome: 'Primeiros Socorros', stat: 'TEC' },
+                    { nome: 'Punga', stat: 'TEC' },
+                    { nome: 'Tecnologia Básica', stat: 'TEC' },
+                    { nome: 'Tecnologia de Armas', stat: 'TEC' },
+                    { nome: 'Tecnologia de Veículos Aéreas', stat: 'TEC' },
+                    { nome: 'Tecnologia de Veículos Marítimos', stat: 'TEC' },
+                    { nome: 'Tecnologia de Veículos Terrestres', stat: 'TEC' },
+                    { nome: 'Tecnologia Eletrônica de Segurança (x2)', stat: 'TEC' }
+                ]
+            };
+
+            // --- INICIALIZAÇÃO ---
+            function init() {
+                // Abas
+                document.querySelectorAll('.tab-link').forEach(button => {
+                    button.addEventListener('click', () => switchTab(button.dataset.tab));
+                });
+
+                // Controles da Ficha
+                document.getElementById('manageSheets').addEventListener('click', toggleSheetManager);
+                document.getElementById('newSheet').addEventListener('click', newSheet);
+                document.getElementById('savePDF').addEventListener('click', () => window.print());
+                document.getElementById('exportJSON').addEventListener('click', exportSheet);
+                document.getElementById('importJSON').addEventListener('change', importSheet);
+
+                // Imagem
+                document.getElementById('imageUpload').addEventListener('change', loadImage);
+
+                // Listeners para Salvar e Calcular (APENAS HP/HUMANIDADE)
+                document.querySelectorAll('[data-save]').forEach(el => {
+                    el.addEventListener('input', autoSave);
+                });
+                document.querySelectorAll('[data-stat]').forEach(el => {
+                    el.addEventListener('input', () => {
+                        updateAllCalculatedStats(); // Atualiza HP, etc.
+                        autoSave(); // Salva a mudança no stat
+                    });
+                });
+
+                // Botões de Adicionar
+                document.getElementById('addArma').addEventListener('click', () => addArma());
+                document.getElementById('addEquipamento').addEventListener('click', () => addEquipamento());
+                document.querySelectorAll('.add-row-btn[data-skill-type]').forEach(btn => {
+                    btn.addEventListener('click', () => addDynamicSkillRow(btn.dataset.skillType));
+                });
+                document.querySelectorAll('.add-row-btn[data-cyber-type]').forEach(btn => {
+                    btn.addEventListener('click', () => addCyberItem(btn.dataset.cyberType));
+                });
+
+                renderAllPericias();
+                loadFormData(getSavedData());
+                renderSheetList();
+                updateAllCalculatedStats();
+            }
+
+            // --- SISTEMA DE ABAS ---
+            function switchTab(tabId) {
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                document.querySelector(`.tab-link[data-tab="${tabId}"]`).classList.add('active');
+            }
+
+            // --- GERENCIAMENTO DE FICHAS (Salvar, Carregar, Múltiplas Fichas) ---
+            function getSavedData() {
+                return sheets[currentSheetId] || {};
+            }
+
+            function autoSave() {
+                sheets[currentSheetId] = getFormData();
+                localStorage.setItem('cyberpunkRedSheets', JSON.stringify(sheets));
+                localStorage.setItem('cyberpunkRedCurrentSheet', currentSheetId);
+                // Atualiza o nome na lista
+                const activeItem = document.querySelector(`#sheetList .sheet-item[data-id="${currentSheetId}"] span`);
+                if (activeItem) {
+                    activeItem.textContent = sheets[currentSheetId].alcunha || 'Ficha Sem Nome';
+                }
+            }
+
+            function getFormData() {
+                const data = {
+                    dynamicSkills: {},
+                    armas: [],
+                    equipamentos: [],
+                    cyberware: {}
+                };
+
+                // Campos simples (Inputs e Textareas)
+                document.querySelectorAll('[data-save]').forEach(el => {
+                    // Verifica se o elemento tem um ID
+                    if (el.id) {
+                        // Para números estáticos, armazena como número, senão como string
+                        data[el.id] = el.type === 'number' ? (parseInt(el.value) || 0) : el.value;
+                    }
+                });
+                
+                // Checkboxes
+                document.querySelectorAll('input[type="checkbox"][data-save]').forEach(el => {
+                    data[el.id] = el.checked;
+                });
+
+                // Imagem
+                data.characterImage = document.getElementById('characterImage').src;
+
+                // Perícias Dinâmicas (Idiomas, etc.)
+                document.querySelectorAll('.dynamic-skill-list').forEach(list => {
+                    const type = list.id.replace('-list', '');
+                    data.dynamicSkills[type] = [];
+                    list.querySelectorAll('.dynamic-skill-item').forEach(item => {
+                        data.dynamicSkills[type].push({
+                            id: item.dataset.id,
+                            nome: item.querySelector('.skill-name-input').value,
+                            nvl: item.querySelector('.skill-nvl').value,
+                            stat: item.querySelector('.skill-stat').value, 
+                            base: item.querySelector('.skill-base').value  
+                        });
+                    });
+                });
+                
+                // Armas
+                document.querySelectorAll('#armasList .arma-item').forEach(item => {
+                    data.armas.push({
+                        id: item.dataset.id,
+                        nome: item.querySelector('.arma-nome').value,
+                        dano: item.querySelector('.arma-dano').value,
+                        municao: item.querySelector('.arma-municao').value,
+                        cdt: item.querySelector('.arma-cdt').value,
+                        obs: item.querySelector('.arma-obs').value,
+                    });
+                });
+                
+                // Equipamentos
+                document.querySelectorAll('#equipamentoList .equip-item').forEach(item => {
+                    data.equipamentos.push({
+                        id: item.dataset.id,
+                        nome: item.querySelector('.equip-nome').value,
+                        qtd: item.querySelector('.equip-qtd').value,
+                        obs: item.querySelector('.equip-obs').value,
+                    });
+                });
+
+                // Cyberware
+                document.querySelectorAll('.cyber-list-box').forEach(box => {
+                    // Encontra o tipo a partir do ID da lista UL (Ex: cyber-audio-list -> audio)
+                    const typeList = box.querySelector('ul[id^="cyber-"]');
+                    if (!typeList) return; 
+
+                    const type = typeList.id.split('-')[1] || typeList.id.split('-')[2]; // 'audio' ou 'olho-direito'
+                    
+                    data.cyberware[type] = [];
+                    typeList.querySelectorAll('.cyber-item').forEach(item => {
+                        data.cyberware[type].push({
+                            id: item.dataset.id,
+                            nome: item.querySelector('.cyber-nome').value,
+                            info: item.querySelector('.cyber-info').value
+                        });
+                    });
+                });
+
+
+                return data;
+            }
+
+            function loadFormData(data) {
+                // Limpa campos antes de carregar
+                document.querySelectorAll('[data-save]').forEach(el => {
+                    if (el.type === 'checkbox') {
+                         el.checked = false;
+                    } else {
+                         el.value = el.type === 'number' ? 0 : '';
+                    }
+                });
+                
+                // Recria as perícias estáticas para garantir que os campos de input existam
+                renderAllPericias(); 
+                
+                // Limpa listas dinâmicas
+                document.querySelectorAll('.dynamic-skill-list').forEach(list => {
+                    const header = list.querySelector('.skill-header');
+                    list.innerHTML = '';
+                    if(header) list.appendChild(header);
+                });
+                document.getElementById('armasList').innerHTML = '';
+                document.getElementById('equipamentoList').innerHTML = '';
+                document.querySelectorAll('.cyber-list-box ul').forEach(list => list.innerHTML = '';);
+                
+                // Carrega campos simples
+                for (const key in data) {
+                    const el = document.getElementById(key);
+                    if (el && el.hasAttribute('data-save')) {
+                        if (el.type === 'checkbox') {
+                            el.checked = data[key] === true;
+                        } else {
+                            el.value = data[key];
+                        }
+                    }
+                }
+
+                // Imagem
+                const imgEl = document.getElementById('characterImage');
+                const uploadTextEl = document.getElementById('uploadText');
+                if (data.characterImage && data.characterImage.startsWith('data:image')) {
+                    imgEl.src = data.characterImage;
+                    imgEl.style.display = 'block';
+                    uploadTextEl.style.display = 'none';
+                } else {
+                    imgEl.src = '';
+                    imgEl.style.display = 'none';
+                    uploadTextEl.style.display = 'block';
+                }
+
+                // Perícias Dinâmicas
+                if (data.dynamicSkills) {
+                    for (const type in data.dynamicSkills) {
+                        // Garante que o header exista (se for uma lista dinâmicas)
+                        let list = document.getElementById(`${type}-list`);
+                        if(list && !list.querySelector('.skill-header')) {
+                            // Recria o header se necessário (embora o HTML já deva ter)
+                            const header = document.createElement('div');
+                            header.className = 'skill-header';
+                            let label = type === 'idiomas' ? 'Idiomas (INT)' : 
+                                        type === 'conhecimento' ? 'Conhecimento de Área (INT)' :
+                                        type === 'ciencias' ? 'Ciências (INT)' : 'Perícia';
+                            header.innerHTML = `<span>${label}</span><span>NVL</span><span>STAT</span><span>BASE</span>`;
+                            list.prepend(header);
+                        }
+                        
+                        if (Array.isArray(data.dynamicSkills[type])) {
+                            data.dynamicSkills[type].forEach(skill => {
+                                addDynamicSkillRow(type, skill);
+                            });
+                        }
+                    }
+                }
+                
+                // Armas
+                if(data.armas && Array.isArray(data.armas)) {
+                    data.armas.forEach(arma => addArma(arma));
+                }
+                
+                // Equipamentos
+                if(data.equipamentos && Array.isArray(data.equipamentos)) {
+                    data.equipamentos.forEach(equip => addEquipamento(equip));
+                }
+
+                // Cyberware
+                if(data.cyberware) {
+                    for (const type in data.cyberware) {
+                        if (Array.isArray(data.cyberware[type])) {
+                            data.cyberware[type].forEach(item => addCyberItem(type, item));
+                        }
+                    }
+                }
+
+                updateAllCalculatedStats();
+            }
+
+            function toggleSheetManager() {
+                const manager = document.getElementById('sheetManager');
+                manager.style.display = manager.style.display === 'none' ? 'block' : 'none';
+            }
+
+            function renderSheetList() {
+                const list = document.getElementById('sheetList');
+                list.innerHTML = '';
+                for (const id in sheets) {
+                    const name = sheets[id].alcunha || `Ficha ${id}`;
+                    const item = document.createElement('div');
+                    item.className = 'sheet-item' + (id === currentSheetId ? ' active' : '');
+                    item.dataset.id = id;
+                    item.innerHTML = `
+                        <span class="sheet-name">${name}</span>
+                        <button class="delete-btn" data-id="${id}">X</button>
+                    `;
+                    item.querySelector('.sheet-name').addEventListener('click', () => switchSheet(id));
+                    item.querySelector('.delete-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteSheet(id);
+                    });
+                    list.appendChild(item);
+                }
+            }
+
+            function switchSheet(id) {
+                if (id === currentSheetId) return;
+                autoSave(); // Salva a ficha atual
+                currentSheetId = id;
+                localStorage.setItem('cyberpunkRedCurrentSheet', currentSheetId);
+                loadFormData(getSavedData()); // Carrega a nova ficha
+                renderSheetList();
+                toggleSheetManager();
+            }
+
+            function newSheet() {
+                const newName = prompt('Digite a alcunha do novo personagem:');
+                if (!newName) return;
+                
+                autoSave(); // Salva a ficha atual
+                const newId = 'ficha-' + Date.now();
+                currentSheetId = newId;
+                sheets[newId] = { alcunha: newName };
+                localStorage.setItem('cyberpunkRedCurrentSheet', currentSheetId);
+                localStorage.setItem('cyberpunkRedSheets', JSON.stringify(sheets));
+                
+                loadFormData(getSavedData()); // Carrega a nova ficha (vazia)
+                renderSheetList();
+                updateAllCalculatedStats();
+            }
+
+            function deleteSheet(id) {
+                if (Object.keys(sheets).length <= 1) {
+                    alert('Você deve ter pelo menos uma ficha.');
+                    return;
+                }
+                if (confirm(`Tem certeza que quer deletar a ficha "${sheets[id].alcunha || 'Sem Nome'}"?`)) {
+                    delete sheets[id];
+                    if (currentSheetId === id) {
+                        currentSheetId = Object.keys(sheets)[0]; // Muda para a primeira ficha
+                    }
+                    localStorage.setItem('cyberpunkRedSheets', JSON.stringify(sheets));
+                    localStorage.setItem('cyberpunkRedCurrentSheet', currentSheetId);
+                    loadFormData(getSavedData());
+                    renderSheetList();
+                }
+            }
+            
+            // --- IMPORTAR / EXPORTAR ---
+            function exportSheet() {
+                autoSave();
+                const data = JSON.stringify(getFormData(), null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const fileName = (getFormData().alcunha || 'ficha_cyberpunk').replace(/\s/g, '_');
+                a.href = url;
+                a.download = `${fileName}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function importSheet(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        // Gera novo ID para a ficha importada
+                        const newId = 'ficha-' + Date.now();
+                        sheets[newId] = data;
+                        currentSheetId = newId;
+                        
+                        localStorage.setItem('cyberpunkRedSheets', JSON.stringify(sheets));
+                        localStorage.setItem('cyberpunkRedCurrentSheet', currentSheetId);
+                        
+                        loadFormData(data);
+                        renderSheetList();
+                        alert(`Ficha "${data.alcunha || 'Importada'}" carregada com sucesso!`);
+                    } catch (err) {
+                        alert('Erro ao ler o arquivo. O JSON é inválido.');
+                        console.error(err);
+                    }
+                };
+                reader.readAsText(file);
+                // Limpa o input para permitir importar o mesmo arquivo novamente
+                event.target.value = null;
+            }
+
+            // --- CARREGAR IMAGEM ---
+            function loadImage(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgEl = document.getElementById('characterImage');
+                    const uploadTextEl = document.getElementById('uploadText');
+                    imgEl.src = e.target.result;
+                    imgEl.style.display = 'block';
+                    uploadTextEl.style.display = 'none';
+                    autoSave();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // --- CÁLCULOS DE STATS (Apenas HP, Humanidade, etc.) ---
+            function getStatValue(statId) {
+                const el = document.getElementById(statId);
+                return el ? (parseInt(el.value) || 0) : 0;
+            }
+
+            function updateAllCalculatedStats() {
+                // Calcula PV
+                const corpo = getStatValue('CORPO');
+                // BTM é o valor arredondado para cima de (CORPO + VON) / 2.
+                const btm = Math.ceil((corpo + getStatValue('VON')) / 2);
+                const pvMax = 10 + (5 * btm);
+                document.getElementById('pv_max').value = pvMax;
+                
+                // Calcula Gravemente Ferido
+                const gfLimiar = Math.ceil(pvMax / 2);
+                document.getElementById('gf_limiar').textContent = `(Limiar: ${gfLimiar})`;
+                
+                // Calcula Teste de Morte
+                document.getElementById('teste_morte').value = corpo;
+                
+                // Calcula Humanidade
+                const empBase = getStatValue('EMP_base');
+                document.getElementById('humanidade_max').value = empBase * 10;
+            }
+
+            // --- RENDERIZAÇÃO DE PERÍCIAS (AGORA COMPLETAMENTE MANUAIS) ---
+            function renderAllPericias() {
+                for (const categoria in pdfPericias) {
+                    const container = document.getElementById(`pericias-${categoria}`);
+                    // Limpa perícias antigas, mas mantém o header
+                    const header = container.querySelector('.skill-header');
+                    container.innerHTML = '';
+                    if(header) container.appendChild(header); // Adiciona o header de volta
+
+                    pdfPericias[categoria].forEach(pericia => {
+                        const el = createPericiaItem(pericia);
+                        container.appendChild(el);
+                    });
+                }
+            }
+
+            function createPericiaItem(pericia) {
+                // Cria IDs únicos para cada campo de input
+                const baseId = pericia.nome.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_');
+                const skillIdNvl = baseId + '_nvl';
+                const skillIdStat = baseId + '_stat';
+                const skillIdBase = baseId + '_base';
+
+                // Pega os valores salvos
+                const savedData = getSavedData();
+                const nvl = savedData[skillIdNvl] || 0;
+                const stat = savedData[skillIdStat] || 0;
+                const base = savedData[skillIdBase] || 0;
+
+                const item = document.createElement('div');
+                item.className = 'skill-item';
+                
+                item.innerHTML = `
+                    <span class="skill-name">${pericia.nome} <span class="stat-label">(${pericia.stat})</span></span>
+                    <input type="number" class="skill-nvl" id="${skillIdNvl}" value="${nvl}" min="0" data-save>
+                    <input type="number" class="skill-stat" id="${skillIdStat}" value="${stat}" min="0" data-save>
+                    <input type="number" class="skill-base" id="${skillIdBase}" value="${base}" min="0" data-save>
+                `;
+                
+                // Adiciona listeners de autoSave a cada input
+                item.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('input', autoSave);
+                });
+                
+                return item;
+            }
+
+            // --- PERÍCIAS DINÂMICAS (IDIOMAS, ETC.) ---
+            function addDynamicSkillRow(type, data = { id: `skill-${type}-${Date.now()}`, nome: '', nvl: 0, stat: 0, base: 0 }) {
+                const list = document.getElementById(`${type}-list`);
+                const item = document.createElement('div');
+                item.className = 'dynamic-skill-item';
+                item.dataset.id = data.id;
+
+                const nvl = data.nvl || 0;
+                const stat = data.stat || 0;
+                const base = data.base || 0;
+
+                item.innerHTML = `
+                    <input type="text" class="skill-name-input" placeholder="Nomear ${type}" value="${data.nome}" data-save>
+                    <input type="number" class="skill-nvl" value="${nvl}" min="0" data-save>
+                    <input type="number" class="skill-stat" value="${stat}" min="0" data-save>
+                    <input type="number" class="skill-base" value="${base}" min="0" data-save>
+                    <button class="delete-row-btn">X</button>
+                `;
+                
+                // Adiciona listeners de autoSave
+                item.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('input', autoSave);
+                });
+                
+                item.querySelector('.delete-row-btn').addEventListener('click', () => {
+                    item.remove();
+                    autoSave();
+                });
+                
+                // Insere o novo item antes do botão de adicionar se ele existir na lista
+                const addButton = list.closest('.dynamic-skill-box').querySelector('.add-row-btn');
+                if (addButton) {
+                    list.insertBefore(item, addButton.nextSibling);
+                } else {
+                    list.appendChild(item);
+                }
+            }
+
+            // --- LISTAS DINÂMICAS (ARMAS, EQUIP, CYBER) ---
+            
+            function addArma(data = { id: `arma-${Date.now()}`, nome: '', dano: '', municao: '', cdt: '', obs: '' }) {
+                const list = document.getElementById('armasList');
+                const item = document.createElement('div');
+                item.className = 'arma-item';
+                item.dataset.id = data.id;
+                item.innerHTML = `
+                    <input type="text" class="arma-nome" placeholder="Nome" value="${data.nome}" data-save>
+                    <input type="text" class="arma-dano" placeholder="Dano" value="${data.dano}" data-save>
+                    <input type="text" class="arma-municao" placeholder="Munição" value="${data.municao}" data-save>
+                    <input type="text" class="arma-cdt" placeholder="CDT" value="${data.cdt}" data-save>
+                    <input type="text" class="arma-obs" placeholder="Obs." value="${data.obs}" data-save>
+                    <button class="delete-row-btn">X</button>
+                `;
+                item.querySelectorAll('input').forEach(i => i.addEventListener('input', autoSave));
+                item.querySelector('.delete-row-btn').addEventListener('click', () => {
+                    item.remove();
+                    autoSave();
+                });
+                list.appendChild(item);
+            }
+
+            function addEquipamento(data = { id: `equip-${Date.now()}`, nome: '', qtd: 1, obs: '' }) {
+                const list = document.getElementById('equipamentoList');
+                const item = document.createElement('div');
+                item.className = 'equip-item';
+                item.dataset.id = data.id;
+                item.innerHTML = `
+                    <input type="text" class="equip-nome" placeholder="Nome do Item" value="${data.nome}" data-save>
+                    <input type="number" class="equip-qtd" placeholder="Qtd" value="${data.qtd}" min="1" data-save>
+                    <input type="text" class="equip-obs" placeholder="Notas" value="${data.obs}" data-save>
+                    <button class="delete-row-btn">X</button>
+                `;
+                item.querySelectorAll('input').forEach(i => i.addEventListener('input', autoSave));
+                item.querySelector('.delete-row-btn').addEventListener('click', () => {
+                    item.remove();
+                    autoSave();
+                });
+                list.appendChild(item);
+            }
+
+            function addCyberItem(type, data = { id: `cyber-${type}-${Date.now()}`, nome: '', info: '' }) {
+                const list = document.getElementById(`cyber-${type}-list`);
+                const item = document.createElement('li');
+                item.className = 'cyber-item';
+                item.dataset.id = data.id;
+                item.innerHTML = `
+                    <input type="text" class="cyber-nome" placeholder="Nome" value="${data.nome}" data-save>
+                    <input type="text" class="cyber-info" placeholder="Info/Custo" value="${data.info}" data-save>
+                    <button class="delete-row-btn">X</button>
+                `;
+                item.querySelectorAll('input').forEach(i => i.addEventListener('input', autoSave));
+                item.querySelector('.delete-row-btn').addEventListener('click', () => {
+                    item.remove();
+                    autoSave();
+                });
+                list.appendChild(item);
+            }
+
+            // Inicia a aplicação
+            init();
+        });
+    </script>
 </body>
 </html>
