@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha Cyberpunk RED (v2.0 - Manual)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="sheetManager" style="display:none;">
+        <h3>Gerenciar Fichas</h3>
+        <div id="sheetList"></div>
+        <button id="newSheet">Nova Ficha</button>
+    </div>
+
+    <div class="header-controls">
+        <button id="manageSheets">Gerenciar Fichas</button>
+        <button id="savePDF">Imprimir/Salvar PDF</button>
+        <button id="exportJSON">Exportar JSON</button>
+        <label for="importJSON" class="btn-import">Importar JSON</label>
+        <input type="file" id="importJSON" accept=".json" style="display:none;">
+    </div>
+
+    <div class="sheet-container">
+        <div class="stats-sidebar">
+            <div class="stat-box">
+                <label for="INT">INT</label>
+                <input type="number" id="INT" value="0" min="0" max="10" data-stat data-save>
+            </div>
+            <div class="stat-box">
+                <label for="REF">REF</label>
+                <input type="number" id="REF" value="0" min="0" max="10" data-stat data-save>
+            </div>
+            <div class="stat-box">
+                <label for="DES">DES</label>
+                <input type="number" id="DES" value="0" min="0" max="10" data-stat data-save>
+            </div>
+            <div class="stat-box">
+                <label for="TEC">TEC</label>
+                <input type="number" id="TEC" value="0" min="0" max="10" data-stat data-save>
+            </div>
+            <div class="stat-box">
+                <label for="MOR">MOR</label>
+                <input type="number" id="MOR" value="0" min="0" max="10" data-stat data-save>
+            </div>
+            <div class="stat-box">
+                <label for="VON">VON</label>
+                <input type="number" id="VON" value="0" min="0" max="10" data-stat data-save>
+            </div>
+            <div class="stat-box">
+                <label for="SORTE">SORTE</label>
+                <input type="number" id="SORTE" value="0" min="0" max="10" data-stat data-save>
+            </div>
+            <div class="stat-box mov-box">
+                <label for="MOV">MOV</label>
+                <input type="number" id="MOV" value="0" min="0" max="10" data-stat data-save>
+            </div>
+            <div class="stat-box">
+                <label for="CORPO">CORPO</label>
+                <input type="number" id="CORPO" value="0" min="0" max="10" data-stat data-save>
+            </div>
+            <div class="stat-box">
+                <label for="EMP_base">EMP (Base)</label>
+                <input type="number" id="EMP_base" value="0" min="0" max="10" data-stat data-save>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header-info">
+                <div class="image-box">
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                    <label for="imageUpload" class="image-label">
+                        <img id="characterImage" src="" alt="Imagem do Personagem" style="display:none;">
+                        <span id="uploadText">CLIQUE PARA ADICIONAR IMAGEM</span>
+                    </label>
+                </div>
+                <div class="text-info">
+                    <div class="input-group">
+                        <label for="alcunha">ALCUNHA</label>
+                        <input type="text" id="alcunha" data-save>
+                    </div>
+                    <div class="input-group">
+                        <label for="cargo">CARGO</label>
+                        <input type="text" id="cargo" data-save>
+                    </div>
+                    <div class="input-group">
+                        <label for="habilidade_cargo">HABILIDADE DE CARGO</label>
+                        <input type="text" id="habilidade_cargo" data-save>
+                        <input type="number" id="graduacao" placeholder="Graduação" min="1" max="10" data-save>
+                    </div>
+                    <div class="input-group full-width">
+                        <label for="observacoes_gerais">OBSERVAÇÕES</label>
+                        <textarea id="observacoes_gerais" data-save></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="calculated-stats">
+                <div class="humanidade-box">
+                    <label for="humanidade_atual">HUMANIDADE</label>
+                    <input type="number" id="humanidade_atual" placeholder="Atual" data-save>
+                    <span class="max-label">MAX: <input type="number" id="humanidade_max" readonly></span>
+                </div>
+                <div class="hp-box">
+                    <label>PONTOS DE VIDA</label>
+                    <div class="hp-inputs">
+                        <input type="number" id="pv_atual" placeholder="Atual" data-save>
+                        <span class="max-label">MAX: <input type="number" id="pv_max" readonly></span>
+                    </div>
+                </div>
+                <div class="crit-vicios-box">
+                    <div class="lesoes-criticas">
+                        <label for="lesoes_criticas">Lesões Críticas</label>
+                        <textarea id="lesoes_criticas" data-save></textarea>
+                    </div>
+                    <div class="vicios">
+                        <label for="vicios">Vícios</label>
+                        <textarea id="vicios" data-save></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="gravemente-ferido-box">
+                <div class="gf-status">
+                    <label for="gf_checkbox">GRAVEMENTE FERIDO</label>
+                    <input type="checkbox" id="gf_checkbox" data-save>
+                    <span id="gf_limiar">(Limiar: 5)</span>
+                </div>
+                <div class="gf-penalidade">
+                    -2 EM TODAS AS AÇÕES
+                    <br>
+                    QUANDO GRAVEMENTE FERIDO
+                </div>
+                <div class="teste-morte">
+                    <label for="teste_morte">TESTE DE MORTE</label>
+                    <input type="number" id="teste_morte" readonly>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-link active" data-tab="pericias-tab">PERÍCIAS</button>
+                <button class="tab-link" data-tab="inventario-tab">INVENTÁRIO & ARMAS</button>
+                <button class="tab-link" data-tab="cyberware-tab">CIBERNÉTICOS</button>
+                <button class="tab-link" data-tab="lifepath-tab">CAMINHO DE VIDA</button>
+            </div>
+
+            <div id="pericias-tab" class="tab-content active">
+                <div class="pericias-grid">
+                    <div class="pericias-box">
+                        <h3>Perícias - Consciência</h3>
+                        <div class="skill-header">
+                            <span>Perícia (STAT)</span>
+                            <span>NVL</span>
+                            <span>STAT</span>
+                            <span>BASE</span>
+                        </div>
+                        <div id="pericias-consciencia" class="skill-list">
+                            </div>
+                    </div>
+
+                    <div class="pericias-box">
+                        <h3>Perícias - Corporais</h3>
+                        <div class="skill-header">
+                            <span>Perícia (STAT)</span>
+                            <span>NVL</span>
+                            <span>STAT</span>
+                            <span>BASE</span>
+                        </div>
+                        <div id="pericias-corporais" class="skill-list">
+                            </div>
+                    </div>
+
+                    <div class="pericias-box">
+                        <h3>Perícias - Controle</h3>
+                        <div class="skill-header">
+                            <span>Perícia (STAT)</span>
+                            <span>NVL</span>
+                            <span>STAT</span>
+                            <span>BASE</span>
+                        </div>
+                        <div id="pericias-controle" class="skill-list">
+                            </div>
+                    </div>
+
+                    <div class="pericias-box">
+                        <h3>Perícias - Luta</h3>
+                        <div class="skill-header">
+                            <span>Perícia (STAT)</span>
+                            <span>NVL</span>
+                            <span>STAT</span>
+                            <span>BASE</span>
+                        </div>
+                        <div id="pericias-luta" class="skill-list">
+                            </div>
+                    </div>
+
+                    <div class="pericias-box">
+                        <h3>Perícias - Armas de Longo Alcance</h3>
+                        <div class="skill-header">
+                            <span>Perícia (STAT)</span>
+                            <span>NVL</span>
+                            <span>STAT</span>
+                            <span>BASE</span>
+                        </div>
+                        <div id="pericias-longoalcance" class="skill-list">
+                            </div>
+                    </div>
+
+                    <div class="pericias-box full-span">
+                        <h3>Perícias - Educacionais</h3>
+                        <div class="skill-header">
+                            <span>Perícia (STAT)</span>
+                            <span>NVL</span>
+                            <span>STAT</span>
+                            <span>BASE</span>
+                        </div>
+                        <div id="pericias-educacionais" class="skill-list">
+                            </div>
+                    </div>
+                    
+                    <div class="pericias-box full-span">
+                        <h3>Perícias - Sociais</h3>
+                        <div class="skill-header">
+                            <span>Perícia (STAT)</span>
+                            <span>NVL</span>
+                            <span>STAT</span>
+                            <span>BASE</span>
+                        </div>
+                        <div id="pericias-sociais" class="skill-list">
+                            </div>
+                    </div>
+
+                    <div class="pericias-box full-span">
+                        <h3>Perícias - Técnicas</h3>
+                        <div class="skill-header">
+                            <span>Perícia (STAT)</span>
+                            <span>NVL</span>
+                            <span>STAT</span>
+                            <span>BASE</span>
+                        </div>
+                        <div id="pericias-tecnicas" class="skill-list">
+                            </div>
+                    </div>
+                    
+                    <div class="pericias-box full-span">
+                        <h3>Perícias Dinâmicas</h3>
+                        
+                        <div class="dynamic-skill-box">
+                            <div class="dynamic-skill-list" id="idiomas-list">
+                                <div class="skill-header">
+                                    <span>Idiomas (INT)</span>
+                                    <span>NVL</span>
+                                    <span>STAT</span>
+                                    <span>BASE</span>
+                                </div>
+                                </div>
+                            <button class="add-row-btn" data-skill-type="idiomas">Adicionar Idioma</button>
+                        </div>
+
+                        <div class="dynamic-skill-box">
+                            <div class="dynamic-skill-list" id="conhecimento-list">
+                                <div class="skill-header">
+                                    <span>Conhecimento de Área (INT)</span>
+                                    <span>NVL</span>
+                                    <span>STAT</span>
+                                    <span>BASE</span>
+                                </div>
+                                </div>
+                            <button class="add-row-btn" data-skill-type="conhecimento">Adicionar Conhec. Área</button>
+                        </div>
+                        
+                        <div class="dynamic-skill-box">
+                            <div class="dynamic-skill-list" id="ciencias-list">
+                                <div class="skill-header">
+                                    <span>Ciências (INT)</span>
+                                    <span>NVL</span>
+                                    <span>STAT</span>
+                                    <span>BASE</span>
+                                </div>
+                                </div>
+                            <button class="add-row-btn" data-skill-type="ciencias">Adicionar Ciência</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="inventario-tab" class="tab-content">
+                <div class="tab-content-grid">
+                    <div class="section-box simple-box">
+                        <h3>MUNIÇÃO / DINHEIRO / MORADIA</h3>
+                        <div class="input-group">
+                            <label for="municao_geral">MUNIÇÃO (Geral)</label>
+                            <input type="text" id="municao_geral" data-save>
+                        </div>
+                        <div class="input-group">
+                            <label for="dinheiro">DINHEIRO</label>
+                            <input type="text" id="dinheiro" data-save>
+                        </div>
+                        <div class="input-group">
+                            <label for="habitacao">HABITAÇÃO</label>
+                            <input type="text" id="habitacao" data-save>
+                        </div>
+                        <div class="input-group">
+                            <label for="aluguel">ALUGUEL</label>
+                            <input type="text" id="aluguel" data-save>
+                        </div>
+                        <div class="input-group">
+                            <label for="estilo_vida">ESTILO DE VIDA</label>
+                            <input type="text" id="estilo_vida" data-save>
+                        </div>
+                    </div>
+                    
+                    <div class="section-box armaduras-box">
+                        <h3>ARMADURA</h3>
+                        <div class="armor-item armor-header">
+                            <span>PEÇA</span>
+                            <span>PP</span>
+                            <span>PENALIDADE</span>
+                        </div>
+                        <div class="armor-item">
+                            <span>CABEÇA</span>
+                            <input type="number" id="armadura_cabeca_pp" placeholder="PP" min="0" data-save>
+                            <input type="number" id="armadura_cabeca_penalidade" placeholder="Penalidade" data-save>
+                        </div>
+                        <div class="armor-item">
+                            <span>CORPO</span>
+                            <input type="number" id="armadura_corpo_pp" placeholder="PP" min="0" data-save>
+                            <input type="number" id="armadura_corpo_penalidade" placeholder="Penalidade" data-save>
+                        </div>
+                        <div class="armor-item">
+                            <span>ESCUDO</span>
+                            <input type="number" id="armadura_escudo_pp" placeholder="PP" min="0" data-save>
+                            <input type="number" id="armadura_escudo_penalidade" placeholder="Penalidade" data-save>
+                        </div>
+                        <p class="small-text">A PENALIDADE SE APLICA A REF, DES & MOV</p>
+                    </div>
+
+                    <div class="section-box full-span armas-box">
+                        <h3>ARMAS</h3>
+                        <div class="arma-header">
+                            <span>ARMA</span>
+                            <span>DANO</span>
+                            <span>MUNIÇÃO</span>
+                            <span>CDT</span>
+                            <span>OBS.</span>
+                        </div>
+                        <div id="armasList" class="list-container">
+                            </div>
+                        <button id="addArma" class="add-row-btn">Adicionar Arma</button>
+                    </div>
+
+                    <div class="section-box full-span equipamento-box">
+                        <h3>EQUIPAMENTO</h3>
+                        <div class="equip-header">
+                            <span>ITEM</span>
+                            <span>QTD</span>
+                            <span>NOTAS</span>
+                        </div>
+                        <div id="equipamentoList" class="list-container">
+                            </div>
+                        <button id="addEquipamento" class="add-row-btn">Adicionar Equipamento</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="cyberware-tab" class="tab-content">
+                <div class="cyber-flex-container">
+                    <div class="cyber-list-box">
+                        <h3>PACOTE DE CIBERAUDIO</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-audio-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="audio">Adicionar Peça de Áudio</button>
+                    </div>
+                    
+                    <div class="cyber-list-box">
+                        <h3>CIBEROLHO DIREITO</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-olho-direito-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="olho-direito">Adicionar Peça de Olho</button>
+                    </div>
+
+                    <div class="cyber-list-box">
+                        <h3>CIBEROLHO ESQUERDO</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-olho-esquerdo-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="olho-esquerdo">Adicionar Peça de Olho</button>
+                    </div>
+
+                    <div class="cyber-list-box">
+                        <h3>CIBERBRAÇO DIREITO</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-braco-direito-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="braco-direito">Adicionar Peça de Braço</button>
+                    </div>
+
+                    <div class="cyber-list-box">
+                        <h3>CIBERBRAÇO ESQUERDO</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-braco-esquerdo-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="braco-esquerdo">Adicionar Peça de Braço</button>
+                    </div>
+
+                    <div class="cyber-list-box">
+                        <h3>CIBERPERNA DIREITA</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-perna-direita-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="perna-direita">Adicionar Peça de Perna</button>
+                    </div>
+
+                    <div class="cyber-list-box">
+                        <h3>CIBERPERNA ESQUERDA</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-perna-esquerda-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="perna-esquerda">Adicionar Peça de Perna</button>
+                    </div>
+                    
+                    <div class="cyber-list-box">
+                        <h3>LINK NEURAL</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-neural-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="neural">Adicionar Peça Neural</button>
+                    </div>
+
+                    <div class="cyber-list-box full-span">
+                        <h3>CIBERNÉTICOS INTERNOS</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-interno-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="interno">Adicionar Cyberware Interno</button>
+                    </div>
+
+                    <div class="cyber-list-box full-span">
+                        <h3>CIBERNÉTICOS EXTERNOS</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-externo-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="externo">Adicionar Cyberware Externo</button>
+                    </div>
+                    
+                    <div class="cyber-list-box full-span">
+                        <h3>EQUIPAMENTO DE MODA</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-moda-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="moda">Adicionar Cyberware de Moda</button>
+                    </div>
+                    
+                    <div class="cyber-list-box full-span">
+                        <h3>EQUIPAMENTO BORGUE</h3>
+                        <div class="cyber-header">
+                            <span>NOME</span>
+                            <span>INFO/CUSTO</span>
+                        </div>
+                        <ul id="cyber-borgue-list"></ul>
+                        <button class="add-row-btn" data-cyber-type="borgue">Adicionar Cyberware Borgue</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="lifepath-tab" class="tab-content">
+                <div class="lifepath-grid">
+                    <div class="section-box">
+                        <h3>CAMINHO DE VIDA</h3>
+                        <div class="input-group">
+                            <label for="origem_cultural">ORIGEM CULTURAL</label>
+                            <textarea id="origem_cultural" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="personalidade">PERSONALIDADE</label>
+                            <textarea id="personalidade" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="estilo_vestimenta">ESTILO DE VESTIMENTA</label>
+                            <textarea id="estilo_vestimenta" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="estilo_cabelo">ESTILO DE CABELO</label>
+                            <textarea id="estilo_cabelo" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="valoriza">O QUE VOCÊ MAIS VALORIZA?</label>
+                            <textarea id="valoriza" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="relacao_pessoas">COMO SE SENTE EM RELAÇÃO ÀS PESSOAS?</label>
+                            <textarea id="relacao_pessoas" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="pessoa_valoriza">PESSOA QUE VOCÊ MAIS VALORIZA</label>
+                            <textarea id="pessoa_valoriza" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="posse_valiosa">POSSE MAIS VALIOSA</label>
+                            <textarea id="posse_valiosa" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="origem_familiar">ORIGEM FAMILIAR</label>
+                            <textarea id="origem_familiar" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="crise_familiar">CRISE FAMILIAR</label>
+                            <textarea id="crise_familiar" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="amigos">AMIGOS</label>
+                            <textarea id="amigos" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="situacao_criacao">SITUAÇÃO DE CRIAÇÃO</label>
+                            <textarea id="situacao_criacao" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="objetivos_vida">OBJETIVOS DE VIDA</label>
+                            <textarea id="objetivos_vida" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="pseudonimos">PSEUDÔNIMOS</label>
+                            <textarea id="pseudonimos" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="historias_amor">HISTÓRIAS DE AMOR TRÁGICAS</label>
+                            <textarea id="historias_amor" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="moda">MODA</label>
+                            <textarea id="moda" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="caminho_cargo">CAMINHO DE VIDA DE CARGO</label>
+                            <textarea id="caminho_cargo" data-save></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="section-box">
+                        <h3>REPUTAÇÃO / PONTOS DE MELHORIA</h3>
+                        <div class="input-group">
+                            <label for="reputacao">REPUTAÇÃO</label>
+                            <input type="number" id="reputacao" min="0" data-save>
+                        </div>
+                        <div class="input-group">
+                            <label for="pontos_melhoria">PONTOS DE MELHORIA</label>
+                            <input type="number" id="pontos_melhoria" min="0" data-save>
+                        </div>
+                        <div class="input-group">
+                            <label for="eventos_reputacao">EVENTOS DE REPUTAÇÃO</label>
+                            <textarea id="eventos_reputacao" data-save></textarea>
+                        </div>
+                        <div class="input-group full-width">
+                            <label for="observacoes_lifepath">OBSERVAÇÕES (LIFEPATH)</label>
+                            <textarea id="observacoes_lifepath" data-save></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-box full-span inimigos-box">
+                        <h3>INIMIGOS</h3>
+                        <div class="input-group">
+                            <label for="inimigo_quem">Quem?</label>
+                            <textarea id="inimigo_quem" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="inimigo_causa">O Que Causou?</label>
+                            <textarea id="inimigo_causa" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="inimigo_podem_fazer">O Que Podem Fazer Contra Você?</label>
+                            <textarea id="inimigo_podem_fazer" data-save></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="inimigo_vai_acontecer">O Que Vai Acontecer?</label>
+                            <textarea id="inimigo_vai_acontecer" data-save></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
